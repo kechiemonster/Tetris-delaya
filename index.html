@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tetris voor Delaya</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="startScreen" class="overlay visible">
+  <h1>Tetris voor Delaya</h1>
+  <p>Een sprookjesachtig spel — speel en verras Delaya ✨</p>
+  <button id="startBtn">Start spel</button>
+</div>
+
+<audio id="bgm" src="music.wav" loop></audio>
+
+<main>
+  <div id="gameArea">
+    <canvas id="board" width="240" height="480"></canvas>
+    <div id="hud">
+      <div>Score: <span id="score">0</span></div>
+      <div>Rij: <span id="lines">0</span></div>
+      <div>Niveau: <span id="level">1</span></div>
+    </div>
+    <div id="controls">
+      <button id="left">◀</button>
+      <button id="rotate">⤴</button>
+      <button id="right">▶</button>
+      <button id="down">▼</button>
+      <button id="drop">⤓</button>
+    </div>
+  </div>
+</main>
+
+<div id="message" class="overlay">
+  <div class="messageCard">
+    <h2 id="messageTitle"></h2>
+    <p id="messageText"></p>
+    <button id="restartBtn">Speel opnieuw</button>
+  </div>
+</div>
+
+<!-- Background artwork -->
+<div id="bgArt" aria-hidden="true">
+  <!-- Embedded SVG castle -->
+  <img src="bg.svg" alt="Sprookjeskasteel achtergrond">
+</div>
+
+<script src="tetris.js"></script>
+</body>
+</html>
