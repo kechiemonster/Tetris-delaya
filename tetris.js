@@ -1,4 +1,4 @@
-// Simple Tetris for Delaya - compact implementation
+// Simple Tetris for Delaya - compact implementation with mobile touch fixes
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const scale = 24;
@@ -20,7 +20,6 @@ const colors = ['#000000','#ffb3d9','#ffd18f','#c8a2ff','#a0e7ff','#ffd6a5','#ca
 
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // background soft glow
   ctx.fillStyle = 'rgba(255,255,255,0.02)';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   for(let r=0;r<rows;r++){
@@ -88,7 +87,6 @@ function clearLines(){
     document.getElementById('score').innerText = score;
     document.getElementById('lines').innerText = lines;
     document.getElementById('level').innerText = level;
-    // small sparkle effect
     spark();
   }
 }
@@ -121,6 +119,7 @@ function loop(){
   gravityInterval = Math.max(120, 800 - (level-1)*60);
   drop();
 }
+
 function startGame(){
   grid = Array.from({length:rows},()=>Array(cols).fill(0));
   score=0; lines=0; level=1;
@@ -131,10 +130,9 @@ function startGame(){
   if(loopId) clearInterval(loopId);
   loopId = setInterval(loop, gravityInterval);
   document.getElementById('startScreen').classList.remove('visible');
-  // Try to play audio
   const bgm = document.getElementById('bgm');
   bgm.currentTime = 0;
-  bgm.play().catch(()=>{ /* mobile may require gesture */ });
+  bgm.play().catch(()=>{});
 }
 
 function gameOver(){
@@ -147,9 +145,6 @@ function showMessage(title,text){
   document.getElementById('messageText').innerText = text;
   const msg = document.getElementById('message');
   msg.classList.add('show');
-  // big sparkle animation
-  msg.style.animation = 'pulse 1s ease-out';
-  // stop music gently
   const bgm = document.getElementById('bgm');
   let fade = setInterval(()=> {
     if(bgm.volume > 0.05){ bgm.volume = Math.max(0, bgm.volume-0.05); }
@@ -157,23 +152,28 @@ function showMessage(title,text){
   },120);
 }
 
-document.getElementById('startBtn').addEventListener('click', ()=> {
-  startGame();
-  document.getElementById('bgm').play();
-});
+// Add both click and touchstart for better mobile support
+function bindBtn(id, handler){
+  const btn = document.getElementById(id);
+  btn.addEventListener('click', handler);
+  btn.addEventListener('touchstart', e=>{ e.preventDefault(); handler(); }, {passive:false});
+}
 
-document.getElementById('restartBtn').addEventListener('click', ()=>{
+bindBtn('startBtn', ()=> {
+  startGame();
+});
+bindBtn('restartBtn', ()=>{
   document.getElementById('message').classList.remove('show');
   document.getElementById('startScreen').classList.add('visible');
 });
 
-document.getElementById('left').addEventListener('click', ()=>{ if(cur && !collide(cur.shape, cur.x-1, cur.y)){ cur.x--; draw(); }});
-document.getElementById('right').addEventListener('click', ()=>{ if(cur && !collide(cur.shape, cur.x+1, cur.y)){ cur.x++; draw(); }});
-document.getElementById('down').addEventListener('click', ()=>{ if(cur) { drop(); }});
-document.getElementById('drop').addEventListener('click', ()=>{ while(cur && !collide(cur.shape, cur.x, cur.y+1)){ cur.y++; } drop();});
-document.getElementById('rotate').addEventListener('click', ()=>{ if(cur){ let r = rotate(cur.shape); if(!collide(r, cur.x, cur.y)) cur.shape = r; draw(); }});
+bindBtn('left', ()=>{ if(cur && !collide(cur.shape, cur.x-1, cur.y)){ cur.x--; draw(); }});
+bindBtn('right', ()=>{ if(cur && !collide(cur.shape, cur.x+1, cur.y)){ cur.x++; draw(); }});
+bindBtn('down', ()=>{ if(cur) { drop(); }});
+bindBtn('drop', ()=>{ while(cur && !collide(cur.shape, cur.x, cur.y+1)){ cur.y++; } drop();});
+bindBtn('rotate', ()=>{ if(cur){ let r = rotate(cur.shape); if(!collide(r, cur.x, cur.y)) cur.shape = r; draw(); }});
 
-// Keyboard
+// Keyboard support
 document.addEventListener('keydown', (e)=>{
   if(e.key==='ArrowLeft') document.getElementById('left').click();
   if(e.key==='ArrowRight') document.getElementById('right').click();
@@ -182,7 +182,6 @@ document.addEventListener('keydown', (e)=>{
   if(e.key==='Enter') { if(!loopId) startGame(); }
 });
 
-// Small sparkle helper
 function spark(){
   const el = document.createElement('div');
   el.style.position='fixed';
@@ -201,5 +200,4 @@ function spark(){
   setTimeout(()=> { el.style.opacity='0'; setTimeout(()=> el.remove(),800); },700);
 }
 
-// initial draw
 draw();
